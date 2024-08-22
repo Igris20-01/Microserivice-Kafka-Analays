@@ -1,0 +1,38 @@
+version: '3.0'
+
+networks:
+  app:
+    driver: bridge
+
+
+volumes:
+  db-data:
+    driver: local
+  redis-data:
+    driver: local
+
+
+services:
+  postgres:
+    image: 'postgres:16-alpine'
+    networks:
+      - app
+    env_file:
+      - .env
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    restart: always
+
+  redis:
+    image: redis:7.2-rc-alpine
+    networks:
+      - app
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - redis-data:/data
